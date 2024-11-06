@@ -1,6 +1,18 @@
 
-#Forward filtering backward sampling.
+# This function runs the forward Kalman filter and the backward sampler to 
+# calculate estimates for the mean and variance of the alpha parameters
+
+# Inputs:
+# y (matrix of outcome data)
+# V (scalar variance estimate of sigma epsilon)
+# W (scalar variance estimate of sigma eta)
+# m0 (scalar initial alpha estimate)
+# C0 (scalar initial variance of alpha estimate)
+# timeDiff (matrix of differences in time between each visit)
+
 ffbs.uneq2 = function(y,V,W,m0,C0, timeDiff){ 
+  
+  #Initializing values and creating storage matrices
   T = ncol(y); n = nrow(y)
   a = matrix(0, n, T); R = matrix(0, n, T) 
   m = matrix(0, n, T); C = matrix(0, n, T); B = matrix(0, n, T-1)
@@ -9,6 +21,8 @@ ffbs.uneq2 = function(y,V,W,m0,C0, timeDiff){
   is.na.y <- is.na(y)
   t <- 0
   t <- t+1
+  
+  #beginning forward Kalman filter calculations
   for (t in 1:T){ 
     if(t==1){
       a[,1] = m0; R[,1] = C0 + W
@@ -26,34 +40,20 @@ ffbs.uneq2 = function(y,V,W,m0,C0, timeDiff){
     llike = llike + sum(dnorm(y[,t],f,sqrt(Q),log=TRUE), na.rm = TRUE) 
   }
   
-  
-  
-  
-  # C[is.na.y] <- 0
-  # B[is.na.y[,-1]] <- 0
-  # H[is.na.y[,-1]] <- 0
-  # R[is.na.y] <- 1
-  # m <- m * !is.na.y
-  # a <- a * !is.na.y
-  
+  #prepping values for backward sampler
   mm[,T] = m[,T]; CC[,T] = C[,T]
-  
   C <- C * !is.na.y
   B <- B * !is.na.y[,-1]
-  
   x[,T] = rnorm(n,m[,T],sqrt(C[,T])) 
-  
-  
-  # x[,T] = m[,T]
   t <- T-1
+  
+  #beginning smoothing backward sampler calculations
   for (t in (T-1):1){ 
     mm[,t] = m[,t] + C[,t]/R[,t+1]*(mm[,t+1]-a[,t+1])
     CC[,t] = C[,t] - (C[,t]^2)/(R[,t+1]^2)*(R[,t+1]-CC[,t+1])
     x[,t] = rnorm(n,m[,t]+B[,t]*(x[,t+1]-a[,t+1]),sqrt(H[,t] + C[,t] * (H[,t] == 0)))
-    # x[,t] = m[,t]+B[,t]*(x[,t+1]-a[,t+1])
   } 
+  #returning estimates of interest
   return(list(x=x,m=m,C=C,mm=mm,CC=CC,llike=llike)) 
 }
 
-
-# bk2ffbs <- list(y = y, C = C, B = B, m = m, H = H)

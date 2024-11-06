@@ -31,6 +31,8 @@
 # 14. C0 (a numeric scalar value for the prior variances of alpha, default 10)
 # 15. seed (a numeric scalar value to set the random seed, default 5631)
 
+#calling ffbs.fac function, needed for Kalman filter calculations
+source("ffbsFac_gh.R")
 
 # Function outputs: A list with estimates from all iterations for G, 
 # alpha, sigma epsilon squared, and sigma eta squared.
@@ -49,9 +51,6 @@ SSM_fac <- function(
   
   #setting seed if needed
   if(!is.null(seed))set.seed(seed)
-  
-  #calling ffbs.fac function, needed for Kalman filter calculations
-  source("ffbsFac_gh.R")
   
   #creating dimension variables to be used throughout
   K <- length(outcome_vars)
