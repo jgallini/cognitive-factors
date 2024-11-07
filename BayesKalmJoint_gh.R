@@ -64,7 +64,7 @@ BayesKalmJoint <- function(data, outcomes, predictors,
     map(~.x[!is.na(.x)])
 
     
-  # Bayesian initialization
+  #Bayesian initialization
   if(initialization == "Bayes"){
     
     #running this function for each outcome one at a time
