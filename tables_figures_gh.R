@@ -22,12 +22,16 @@ library(ggmagnify)
 library(scales)
 
 #bringing in data
-load("test.Rda")
-load("train.Rda")
-load("powerlist.Rda")
-load("nlist.Rda")
-load("eventlist.Rda")
-load("hrlist.Rda")
+load("test_gh.Rda")
+load("train_gh.Rda")
+load("powerlist_gh.Rda")
+load("nlist_gh.Rda")
+load("eventlist_gh.Rda")
+load("hrlist_gh.Rda")
+
+#renaming data
+test<-test_gh
+train<-train_gh
 
 
 ###### Table 1 #########
