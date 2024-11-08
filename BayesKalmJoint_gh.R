@@ -65,6 +65,9 @@ BayesKalmJoint <- function(data, outcomes, predictors,
 
     
   #Bayesian initialization
+  #First estimating model parameters for each outcome one at a time 
+  #to be used as initial estimates when estimating the multivariate
+  #model with appropriate correlation structures later in this program
   if(initialization == "Bayes"){
     
     #running this function for each outcome one at a time
@@ -87,7 +90,7 @@ BayesKalmJoint <- function(data, outcomes, predictors,
       
       #Now estimating parameters for model using first 1500 samples, 
       #500 burn in, these estimates will be the initial estimates
-      #in the final estimation step
+      #in the multivariate estimation step
       BayesKalm.Uneq(
         y.long = data[[outcomes]], X.long = as.matrix(data[predictors]),
         id = data[[id]], time = data[[timevar]],
@@ -180,7 +183,7 @@ cat("initialization complete...\n")
   cat("Fitting Model...\n")
   if(!silence) pb <- txtProgressBar(min = 0, max = numits, style = 3)
   
-  #Beginning Gibbs sampler
+  #Beginning Gibbs sampler (multivariate estimation)
   for(It in 1:numits){
     
     i <- 1

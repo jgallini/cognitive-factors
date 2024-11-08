@@ -1,7 +1,10 @@
 
 # This function calculates initial estimates for all of the parameters 
-# needed in the multivariate model. These estimates are then used 
-# to initiate the main Gibbs sampler in BayesKalmJoint_gh.R.
+# needed in the multivariate model by estimating parameters for one 
+# outcome at a time in a univariate fashion.
+# These estimates are then used to initiate the main Gibbs sampler 
+# so that the parameters are estimated in a multivariate fashion in 
+# BayesKalmJoint_gh.R.
 
 # Inputs
 # y.long (a long matrix of outcome data, in this case one outcome)
