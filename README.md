@@ -33,7 +33,7 @@ Step 4: Using estimated factor scores in step 3, run RCT_simulation_gh.R to
 Step 5: Run tables_figures_gh.R to create tables and figures reflecting results
         from the simulation.
         
-Training and testing data used in steps 4 and 5 are provided.
+Training and testing data used in steps 4 and 5 are provided. Power, sample size, hazard ratio, and needed event data are provided for creating tables and figures in tables_figures_gh.R.
                             
 
       
