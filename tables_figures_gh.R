@@ -125,7 +125,7 @@ ggplot(graphdf2[graphdf2$trial_type_clean!="Cognitive Test Model",],
            color=trial_type_clean)) + 
   geom_line() + geom_point() + ylab("Median Power (10,000 trials)") +
   xlab("Treatment Effect Size") +
-  #ggtitle("RCT Power Using Different Sampling Methods")+
+  ggtitle("Figure 3. Median RCT Power Using Different Sampling Methods")+
   theme(legend.position = c(0.8, 0.28))+
   scale_color_discrete(name = "Sampling Type")
 dev.off()
@@ -137,8 +137,8 @@ ggplot(graphevent, aes(x=treat_effect, y=median, group=trial_type_clean,
                        color=trial_type_clean)) +
   geom_line() + geom_point() + ylab("Median N(10,000 trials)") +
   xlab("Treatment Effect Size") +
-  #ggtitle("N Required to Recruit for 0.8 Power Using Different 
-  #Sampling Methods")+
+  ggtitle("Figure 4. Median N Required to Recruit for 0.8 Power Using Different 
+  Sampling Methods")+
   theme(legend.position = c(0.75, 0.65))+
   scale_color_discrete(name = "Sampling Type")+
   geom_magnify(from=c(0.2,0.5,100,7000),to=c(0.2,0.5,30000,120000),
@@ -167,6 +167,8 @@ ggplot(graphdfhr[graphdfhr$treat_effect==0.2,],
                   aes(x = value, fill=trial_type_clean)) + 
   geom_density(alpha = 0.5)+geom_vline(xintercept = 0.8, linetype="dotted", 
                                        color = "black", linewidth=1)+
+  ggtitle("Figure 2. Observed Hazard Ratios for a Theoretical Hazard Ratio 
+          of 0.8 (Treatment Effect of 0.2)")+
   ylab("Density over 10,000 iterations")+xlab("Empirical Hazard Ratio")+
   theme(legend.position = c(0.75, 0.6))+
   guides(fill=guide_legend(title="Sampling Type"))
