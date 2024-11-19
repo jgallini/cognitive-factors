@@ -35,7 +35,9 @@ Step 5: Run tables_figures_gh.R to create tables and figures reflecting results
         
 Training and testing data used in steps 4 and 5 are provided. Power, sample size, hazard ratio, and needed event data are provided for creating tables and figures in tables_figures_gh.R.
 
-Using other versions of R: https://github.com/r-lib/rig
+This R project incorporates the 'renv' package to maximize reproducibility. After opening the R project run renv::restore() when prompted to download and install the correct versions of all required packages. For more information on renv please see: https://rstudio.github.io/renv/articles/renv.html.
+
+This code was written on R version 4.2.3 and may not work using other versions of R. For information on installing other versions of R: https://github.com/r-lib/rig.
                             
 
       
