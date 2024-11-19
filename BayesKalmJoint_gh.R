@@ -26,6 +26,7 @@
 #libraries and required sub-functions
 library(mvtnorm)
 library(tidyverse)
+library(dplyr)
 source("BayesKalmUneq_gh.R")
 source("ffbsJoint_gh.R")
 
@@ -165,8 +166,6 @@ cat("initialization complete...\n")
       crossprod()
   
   sig2beta_XtX <- sigma2.beta * XtX 
-  #why are we multiplying by prior variance for beta here??
-  #it's inverse is added in the thesis
   
   ex <- eigen(sig2beta_XtX, symm = TRUE)
   
@@ -236,7 +235,7 @@ cat("initialization complete...\n")
     
     B.Big <- sigma2.beta * B.sum - tcrossprod(V, Beta.Initial)
     
-    Sigma.Inv <- lapply(sigma2.eps.star, 
+    Sigma.Inv <- lapply(sigma2.eps.star, #should this be sigma beta?
                         function(eppps)tcrossprod(ex$vectors/
                             (ex$values + eppps)[col(ex$vectors)], ex$vectors))
     
@@ -244,6 +243,7 @@ cat("initialization complete...\n")
     BetaSim <- lapply(1:cs, function(i){
       rmvnorm(1, mean = crossprod(Sigma.Inv[[i]], B.Big[i,]), 
               sigma = Sigma.Inv[[i]] * sigma2.eps.star[i] * sigma2.beta)
+      #still missing a + sigma beta I think??
     }) %>% do.call("rbind", .) %>% t()
 
     #Storing latest beta estimates in tracking matrix
