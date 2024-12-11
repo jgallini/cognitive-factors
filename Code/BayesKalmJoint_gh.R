@@ -27,8 +27,10 @@
 library(mvtnorm)
 library(tidyverse)
 library(dplyr)
-source("BayesKalmUneq_gh.R")
-source("ffbsJoint_gh.R")
+here::i_am("Code/BayesKalmJoint_gh.R")
+library(here)
+source(here("Code","BayesKalmUneq_gh.R"))
+source(here("Code","ffbsJoint_gh.R"))
 
 BayesKalmJoint <- function(data, outcomes, predictors, 
                                  timevar, id, initialization = "Bayes", 
@@ -54,9 +56,14 @@ BayesKalmJoint <- function(data, outcomes, predictors,
     map(~select(.x, all_of(outcomes))) %>%
     map(~t(as.matrix(.x)))
   #Define matrix of predictors for each id
-  X <- ndat %>%
+  X_all <- ndat %>%
     map(~select(.x, all_of(predictors))) %>%
     map(~(as.matrix(.x)))
+  #Replacing with only baseline covariates for each time point
+  #to avoid smoke years changing as well as other variables changing
+  X <- lapply(1:length(X_all),function(i){
+    matrix(rep(X_all[[i]][1,],nrow(X_all[[i]])),nrow=nrow(X_all[[i]]),byrow=TRUE)
+  })
   #create vector of time and timediff for each id
   time <- ndat %>%
     map("time")
@@ -118,7 +125,7 @@ BayesKalmJoint <- function(data, outcomes, predictors,
 BayesInit<-lapply(BayesInit,setNames,
               c("Beta.Initial","sigma2.eta","sigma2.eps","u0","P0","bkout"))
 
-#printing that initialization step is complete
+#printing that initialization step is complete at this point
 cat("initialization complete...\n")
   
   ### Prior specification ###
@@ -159,17 +166,7 @@ cat("initialization complete...\n")
   B.star <- Beta.Initial
   B2 <- matrix(B.star, ncol = cs)
   
-  #Calculating matrices needed in later calculations for beta posterior
-  #Transform for quicker inverse calculation
-  XtX <- data[,predictors] %>%
-      as.matrix() %>%
-      crossprod()
-  
-  sig2beta_XtX <- sigma2.beta * XtX 
-  
-  ex <- eigen(sig2beta_XtX, symm = TRUE)
-  
-  #Creating empty tracking objcets
+  #Creating empty tracking objects
   Beta.Track <- array(NA, dim = c(ncol(X[[1]]), cs, numits))
   vcovWish <- array(NA, dim = c(cs, cs, numits))
   sigma2.eps.Track <- matrix(NA, nrow = numits, ncol = cs)
@@ -222,28 +219,71 @@ cat("initialization complete...\n")
     V <- sigma2.eps.star * diag(cs)
     
     
-    #Beta estimation NEED TO VERIFY THESE CALCULATIONS MATCH WITH THESIS PG 42
+    #Beta estimation
+    #Julia changing this part based on her derivations
+    
+    #First calculating Sigma term in beta posterior derivation
+  
+    #expanding X matrix to be number of outcome rows for each person,
+    #just replicating baseline covariates over and over
+    #Xbig<-lapply(1:n,function(i){
+    #  matrix(rep(X[[i]][1,],cs),nrow=cs,byrow=TRUE)
+    #})
+    
+    #solving for sum of Xt*X summed over all persons and time points
+    XX <- lapply(1:n, function(i){
+     t(X[[i]]) %*% X[[i]]
+    })%>% Reduce("+", .)
+    
+    #adding inverse of sigma beta matrix 
+    #(beta variance prior for all outcomes) 
+    #to XX/sigeps to create Sigma term in beta posterior derivation
+    #There will be a Sigma term for each outcome
+    Sigma <- lapply(1:cs, function(k){
+      ((1/sigma2.eps.star[k])*XX)+diag(rep(1/sigma2.beta,length(predictors)))
+    })
+
+    #Calculating Sigma inverse
+    Sigma.Inv<-lapply(1:cs, function(k){
+      solve(Sigma[[k]])
+    })
+    
+
+    #now calculating B term from beta posterior derivation
     
     #subtracting alpha estimates from y's
-    v.star <- lapply(1:n, function(i){
+    yalph <- lapply(1:n, function(i){
       (y[[i]]-bout[[i]])
     })
     
-    B.sum <- lapply(1:n, function(i){
-      (v.star[[i]] %*% X[[i]])
-    }) %>% Reduce("+", .)
+    #multiplying by Sigma eps inv and then Xij 
+    #doing one time point at a time for each person
+    #one outcome at a time
+    B.unsum <- lapply(1:cs,function(k){#each outcome
+      lapply(1:n, function(i){#over each person
+        lapply(1:length(time[[i]]),function(j){#over each time point
+          (yalph[[i]][k,j] * X[[i]][j,]) #note: all rows of X should be the same 
+        })
+      }) 
+    })
     
-    B.Big <- sigma2.beta * B.sum - tcrossprod(V, Beta.Initial)
+    #now summing over all persons and time points within each outcome
+    #will result in a 1xp vector for each outcome
+    B.sum <- lapply(1:cs,function(k){
+      unlist(B.unsum[[k]],recursive=FALSE) %>% Reduce('+',.)
+    })
     
-    Sigma.Inv <- lapply(sigma2.eps.star, #should this be sigma beta?
-                        function(eppps)tcrossprod(ex$vectors/
-                            (ex$values + eppps)[col(ex$vectors)], ex$vectors))
+    #final 'B' term from beta posterior derivation
+    B.Big <- lapply(1:cs,function(k){
+      ((1/sigma2.eps.star[k])*B.sum[[k]]) + (t(Beta.Initial[,k]) %*%
+      diag(rep(1/sigma2.beta,length(predictors))))
+    })
     
+
     #Drawing from posterior distribution of beta to get estimate
-    BetaSim <- lapply(1:cs, function(i){
-      rmvnorm(1, mean = crossprod(Sigma.Inv[[i]], B.Big[i,]), 
-              sigma = Sigma.Inv[[i]] * sigma2.eps.star[i] * sigma2.beta)
-      #still missing a + sigma beta I think??
+    BetaSim <- lapply(1:cs, function(k){
+      rmvnorm(1, mean = t(B.Big[[k]]%*%Sigma.Inv[[k]]), 
+              sigma = Sigma.Inv[[k]])
     }) %>% do.call("rbind", .) %>% t()
 
     #Storing latest beta estimates in tracking matrix
