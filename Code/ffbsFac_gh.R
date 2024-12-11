@@ -46,7 +46,7 @@ ffbs.fac = function(y,G,V,W,m0,C0, timeDiff = rep(1, ncol(y)-1)){ #should't this
       #initiate alpha estimate and covariance of alpha estimate
       a[,1] = m0; R[,,1] = C0 + W 
     }else{
-      #take most recent smoothed estimates for alpha and covariance of alpha
+      #take most recent updated estimates for alpha and covariance of alpha
       a[,t] = m[,t-1]; R[,,t] = C[,,t-1] + timeDiff[t-1] * W
     }
     #calculating updated alpha estimate and covariance
