@@ -23,7 +23,8 @@
 # default=FALSE)
 
 #Loading Kalman filter function.
-source("ffbsUneq_gh.R")
+here::i_am("Code/BayesKalmUneq_gh.R")
+source(here("Code","ffbsUneq_gh.R"))
 
 BayesKalm.Uneq <- function(y.long, X.long, id, time, Burn = 500, 
                            Its = 1500, Beta.Initial = 0, sigma2.beta = 10, 
@@ -72,8 +73,7 @@ BayesKalm.Uneq <- function(y.long, X.long, id, time, Burn = 500,
     X[i,,] <- t(xl[[i]])
   
   # initialize beta
-  if(length(Beta.Initial)  == p) Beta.Initial <- Beta.Initial 
-  else Beta.Initial <- rep(Beta.Initial, p)
+  if(length(Beta.Initial)==p) Beta.Initial<-Beta.Initial else Beta.Initial<-rep(Beta.Initial, p)
   B.star <- Beta.Initial
   
   # initialize starting points for the variance parameters
@@ -90,7 +90,7 @@ BayesKalm.Uneq <- function(y.long, X.long, id, time, Burn = 500,
   nv.length <- numeric(Its)
   
   #Calculations needed for beta posterior
-  sig2beta_XtX <- sigma2.beta * crossprod(X.long)
+  sig2beta_XtX <- sigma2.beta * crossprod(X.long)+(diag(sigma2.eps.star,p))
   ex <- eigen(sig2beta_XtX, symm = TRUE)
   
   #printing update to see while code is running
@@ -99,11 +99,11 @@ BayesKalm.Uneq <- function(y.long, X.long, id, time, Burn = 500,
   #beginning Gibbs sampler
   for(j in 1:Its){
     
-    #Alpha estimation (called mu in some cases)
-    #prepping y data by subtracting linear effects
+    #Alpha estimation (also referred to as mu sometimes)
+    #adjusting y data by subtracting linear covariate effects
     y.star <- y - apply(X,3, function(x) x %*% B.star)
     y.star.Track[,,j] <- y.star    
-    #getting alpha estimates from Kalman filter
+    #getting alpha posterior estimates from Kalman filter
     mu.star <- suppressWarnings(ffbs.uneq2(y = y.star, V = sigma2.eps.star, 
                                            W = sigma2.eta.star, m0 = u0, 
                                            C0 = P0, timeDiff = timeDiff)$x)
@@ -128,7 +128,7 @@ BayesKalm.Uneq <- function(y.long, X.long, id, time, Burn = 500,
     v.star <- (y-mu.star)
     B.sum <- rowSums(sapply(1:T, function(x) colSums(v.star[,x] * X[,,x], 
                                                 na.rm = TRUE)), na.rm = TRUE)
-    B.Big <- sigma2.beta * B.sum + sigma2.eta.star * Beta.Initial
+    B.Big <- sigma2.beta * B.sum + sigma2.eps.star * Beta.Initial
     Sigma.Inv <- tcrossprod(
       ex$vectors/(ex$values + sigma2.eps.star)[col(ex$vectors)], ex$vectors)
     #Drawing from posterior of beta and storing as current estimate
