@@ -9,6 +9,8 @@ Alzheimer's disease drug trial using factor models.
 Below is a general outline of how to use the provided code to get results from
 the randomized controlled trial simulation.
 
+*** Data should be sorted by ID and then by time before using these functions *** 
+
 Step 1: Estimate linear effects of covariates (to be removed in factor 
         analysis).
       
