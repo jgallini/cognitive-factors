@@ -90,6 +90,8 @@ ffbs.fac = function(y,G,V,W,m0,C0, timeDiff = rep(1, ncol(y)-1)){ #should't this
                              sigma = H[,,t], checkSymmetry = FALSE)
   } 
   
- #returning alpha estimates (x) and covariance estimates (m,C) 
+ #returning smoothed posterior alpha estimates (x, main interest), 
+ #updated alpha estimates from forward filter (m),
+ #and covariance estimates (C) 
   return(list(x=x,m=m,C=C))
 }
