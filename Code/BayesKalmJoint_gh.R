@@ -131,7 +131,7 @@ cat("initialization complete...\n")
   ### Prior specification ###
   
   #Specify number of state differences and total number of observations
-  Neta <- (map_dbl(timeDiff, length) %>% sum())
+  Neta <- (map_dbl(timeDiff, length) %>% sum()) #equal to N(J-1)
   Ntotal <-  nrow(data)
   
   #Setting priors to be the estimates from initialization above
