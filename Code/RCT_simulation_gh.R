@@ -43,13 +43,13 @@ its<-10000
 #Then running a model with each factor one at a time.
 mod_func<-function(cscore){
   fml <- reformulate(c(cscore,"SEX","EDUC","NACCAGEB","RACE","NACCNE4S",
-                       "HYPERTEN","DIABETES","SMOKYRS",
+                       "HYPERT","DIABETES","SMOKYRS",
                        "BMI_bin","NACCTBI","DEPever"), response="DemEver")
   mod <- glm(fml,family=binomial(link='logit'),data=train)
   pred<-predict(mod, newdata = 
                   train[,c("Fac1_std","Fac2_std","Fac3_std","Fac4_std",
                           "SEX","EDUC","NACCAGEB","RACE","NACCNE4S",
-                          "HYPERTEN","DIABETES","SMOKYRS","BMI_bin",
+                          "HYPERT","DIABETES","SMOKYRS","BMI_bin",
                           "NACCTBI","DEPever","LOGIMEM_3","DIGIF_3",
                           "DIGIB_3","ANIMALS_3","VEG_3","TRAILA_3",
                           "TRAILB_3","WAIS_3","MEMUNITS_3","BOSTON_3")])
@@ -74,12 +74,12 @@ mod_func(cscore="Fac3_std"); mod_func(cscore="Fac4_std");
 #Now examining 3 year AD conversion logistic regression model with all 4 factors
 sensspec<-train
 mallfac <- glm(DemEver ~ Fac1_std+Fac2_std+Fac3_std+Fac4_std+SEX+EDUC+
-              NACCAGEB+RACE+NACCNE4S+HYPERTEN+DIABETES+SMOKYRS+
+              NACCAGEB+RACE+NACCNE4S+HYPERT+DIABETES+SMOKYRS+
               BMI_bin+NACCTBI+DEPever,family=binomial(link='logit'),data=train)
 sensspec$mallfac_pred<-predict(mallfac, newdata = 
                                  train[,c("Fac1_std","Fac2_std","Fac3_std",
                                           "Fac4_std","SEX","EDUC","NACCAGEB",
-                                          "RACE","NACCNE4S","HYPERTEN",
+                                          "RACE","NACCNE4S","HYPERT",
                                           "DIABETES","SMOKYRS","BMI_bin",
                                           "NACCTBI","DEPever")])
 sensspec$mallfac_prob<-exp(sensspec$mallfac_pred)/(1+exp(sensspec$mallfac_pred))
@@ -87,35 +87,21 @@ sensspec$mallfac_dem<-ifelse(sensspec$mallfac_prob>=0.15,1,0)
 sensitivity(as.factor(sensspec$mallfac_dem),as.factor(sensspec$DemEver))
 specificity(as.factor(sensspec$mallfac_dem),as.factor(sensspec$DemEver))
 logistic.display(mallfac)
-#language and memory factors highly significant here
-
-#model with just language and memory factors
-mfac_final <- glm(DemEver ~ Fac2_std+Fac4_std+SEX+EDUC+NACCAGEB+RACE+
-                    NACCNE4S+HYPERTEN+DIABETES+SMOKYRS+BMI_bin+NACCTBI+
-                    DEPever,family=binomial(link='logit'),data=train)
-sensspec$mfac_final_pred<-predict(mfac_final, newdata = 
-                                    train[,c("Fac1_std","Fac2_std","Fac3_std",
-                                             "Fac4_std","SEX","EDUC","NACCAGEB",
-                                             "RACE","NACCNE4S","HYPERTEN",
-                                             "DIABETES","SMOKYRS","BMI_bin",
-                                             "NACCTBI","DEPever")])
-sensspec$mfac_final_prob<-exp(sensspec$mfac_final_pred)/
-  (1+exp(sensspec$mfac_final_pred))
-sensspec$mfac_final_dem<-ifelse(sensspec$mfac_final_prob>=0.15,1,0)
-sensitivity(as.factor(sensspec$mfac_final_dem),as.factor(sensspec$DemEver))
-specificity(as.factor(sensspec$mfac_final_dem),as.factor(sensspec$DemEver))
-logistic.display(mfac_final)
+#language and memory factors highly significant here, 
+#psychomotor speed also significant, leaving all
+#factors in to avoid missing any confounding
+mfac_final<-mallfac
 
 
 #Now examining an only covariates model, no cognitive factors or cognitive tests
 #included as predictors
-mcov <- glm(DemEver ~ SEX+EDUC+NACCAGEB+RACE+NACCNE4S+HYPERTEN+DIABETES+
+mcov <- glm(DemEver ~ SEX+EDUC+NACCAGEB+RACE+NACCNE4S+HYPERT+DIABETES+
             SMOKYRS+BMI_bin+NACCTBI+DEPever,family=binomial(link='logit'),
             data=train)
 sensspec$mcov_pred<-predict(mcov, newdata = 
                               train[,c("Fac1_std","Fac2_std","Fac3_std",
                                        "Fac4_std","SEX","EDUC","NACCAGEB",
-                                       "RACE","NACCNE4S","HYPERTEN","DIABETES",
+                                       "RACE","NACCNE4S","HYPERT","DIABETES",
                                        "SMOKYRS","BMI_bin","NACCTBI",
                                        "DEPever")])
 sensspec$mcov_prob<-exp(sensspec$mcov_pred)/(1+exp(sensspec$mcov_pred))
@@ -158,7 +144,7 @@ for (treat_effect in c(0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.40,0.45,0.50)){
     d1$pred<-predict(mfac_final, newdata = 
                        d1[,c("Fac1_std","Fac2_std","Fac3_std","Fac4_std",
                             "SEX","EDUC","NACCAGEB","RACE","NACCNE4S",
-                            "HYPERTEN","DIABETES","SMOKYRS","BMI_bin",
+                            "HYPERT","DIABETES","SMOKYRS","BMI_bin",
                             "NACCTBI","DEPever")])
     d1$prob<-exp(d1$pred)/(1+exp(d1$pred))
     #now sampling from subjects with >15% probability of developing 
@@ -173,7 +159,7 @@ for (treat_effect in c(0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.40,0.45,0.50)){
     d1$covpred<-predict(mcov, newdata = 
                           d1[,c("Fac1_std","Fac2_std","Fac3_std","Fac4_std",
                                 "SEX","EDUC","NACCAGEB","RACE","NACCNE4S",
-                                "HYPERTEN","DIABETES","SMOKYRS","BMI_bin",
+                                "HYPERT","DIABETES","SMOKYRS","BMI_bin",
                                 "NACCTBI","DEPever")])
     d1$covprob<-exp(d1$covpred)/(1+exp(d1$covpred))
     #again sampling from subjects with >15% probability of 
@@ -325,8 +311,8 @@ for (treat_effect in c(0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.40,0.45,0.50)){
 }
 
 #saving output
-save(powerlist,file="powerlist.Rda")
-save(nlist,file="nlist.Rda")
-save(hrlist,file="hrlist.Rda")
-save(eventlist,file="eventlist.Rda")
+save(powerlist,file=here("Data","powerlist_gh.Rda"))
+save(nlist,file=here("Data","nlist_gh.Rda"))
+save(hrlist,file=here("Data","hrlist_gh.Rda"))
+save(eventlist,file=here("Data","eventlist_gh.Rda")
 
