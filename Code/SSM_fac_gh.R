@@ -1,6 +1,6 @@
 
 #This program creates a function that estimates factor scores for each 
-#participant at each time point (alphas), the factor loading  matrix G, 
+#participant at each time point (alphas), the factor loading matrix G, 
 #and the variance components sigma eta and sigma epsilon
 
 # Inputs to this function: 
@@ -31,11 +31,13 @@
 # 14. C0 (a numeric scalar value for the prior variances of alpha, default 10)
 # 15. seed (a numeric scalar value to set the random seed, default 5631)
 
-#calling ffbs.fac function, needed for Kalman filter calculations
-source("ffbsFac_gh.R")
-
 # Function outputs: A list with estimates from all iterations for G, 
 # alpha, sigma epsilon squared, and sigma eta squared.
+
+#calling ffbs.fac function, needed for Kalman filter calculations
+library(here)
+here::i_am("Code/SSM_fac_gh.R")
+source(here("Code","ffbsFac_gh.R"))
 
 
 SSM_fac <- function(
@@ -66,7 +68,7 @@ SSM_fac <- function(
   nid <- N <- length(uid) #number of unique participants
   Ntotal <- nrow(data) #number of total observations
   Neta <- nrow(data) - nid #diff between total observations and number of 
-  #partipants (N(J-1)), will be component in posterior
+  #participants (N(J-1)), will be component in posterior
   #degrees of freedom calculation for sigma eta distribution
   
   #creating matrix of outcomes,matrix of time points, and initial matrix
@@ -172,7 +174,7 @@ SSM_fac <- function(
     #Sigma eta  
     if(i > wait){
       
-      #calculating likelihood portion of posterior
+      #calculating likelihood portion of posterior parameter
       fp <- lapply(1:N, function(i){
         apply(alpha.star[[i]], 1, function(z)diff(z))/sqrt(time_diff[[i]] )
       }) %>% do.call("rbind", .) %>% crossprod()
@@ -199,7 +201,7 @@ SSM_fac <- function(
     #k estimate
     for (k in 1:10){
       sigma2.eps.star[k] <- 1/rgamma(1, (((Ntotal) + see0[k])/2), 
-                                     (orList[[i]][k]+d0[k])/2)
+                                     (or[k]+d0[k])/2)
     }
     
     #storing all estimates
