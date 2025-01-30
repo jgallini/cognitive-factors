@@ -55,7 +55,8 @@ BayesKalmJoint <- function(data, outcomes, predictors,
   y <- ndat %>%
     map(~select(.x, all_of(outcomes))) %>%
     map(~t(as.matrix(.x)))
-  #Define matrix of predictors for each id
+  #Define matrix of predictors for each id (assumes standardized outcomes and 
+  #therefore no intercept. To add an intercept append a column of 1's)
   X_all <- ndat %>%
     map(~select(.x, all_of(predictors))) %>%
     map(~(as.matrix(.x)))
@@ -89,6 +90,8 @@ BayesKalmJoint <- function(data, outcomes, predictors,
       #Storing key output from initial model
       data$resid <- resid(initmodel)
       Beta.Initial <- coef(initmodel)[-1]
+      #initiate alpha values as the intercept since they functionally are
+      #in this model
       u0 <- coef(initmodel)[1]
       P0 <- data %>%
         group_by(id) %>%
