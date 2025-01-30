@@ -8,11 +8,12 @@
 
 # Inputs
 # y.long (a long matrix of outcome data, in this case one outcome)
-# X.long (a long matrix of all predictors)
+# X.long (a long matrix of all predictors, assumes standardized outcomes and 
+# therefore no intercept. To add an intercept append a column of 1's)
 # id (the ID variable to be used for each participant)
 # time (the time variable to be used)
 # Burn (scalar number of burn-in iterations, default 500)
-# Its (scaler number of iterations, default=1500)
+# Its (scalar number of iterations, default=1500)
 # Beta.Initial (initial scalar value for beta, default=0)
 # sigma2.beta (initial scalar value for variance of beta, default=10) 
 # u0 (initial scalar value for alpha, default=0)
@@ -21,6 +22,17 @@
 # default = 0.01)
 # silence (TRUE/FALSE value for whether or not to suppress update output, 
 # default=FALSE)
+
+# Output: a list called bkout
+# Components of bkout:
+# Beta: all beta estimates from the sampler over all iterations
+# sigma2.eps: all sigma squared epsilon estimates over all iterations
+# sigma2.eta all sigma squared eta estimates over all iterations
+# mu: all alpha (state) estimates over all iterations
+# X: all covariate data
+# timeMat: time data for all subjects
+# y: all outcome data
+# id: all unique ID's
 
 #Loading Kalman filter function.
 here::i_am("Code/BayesKalmUneq_gh.R")
