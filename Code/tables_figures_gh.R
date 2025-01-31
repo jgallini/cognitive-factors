@@ -48,7 +48,7 @@ test$RACE<-factor(test$RACE,levels=c(1,2,3,5),labels=c(
   Native Hawaiian/Other Pacific Islander","Asian"))
 test$NACCNE4S<-factor(test$NACCNE4S,levels=c(0,1,2),labels=c(
   "0 e4 alleles","1 e4 allele","2 e4 alleles"))
-test$HYPERTEN<-factor(test$HYPERTEN,levels=c(0,1,2),labels=c(
+test$HYPERT<-factor(test$HYPERT,levels=c(0,1,2),labels=c(
   "Never","Recent/Active","Remote/Inactive"))
 test$DIABETES<-factor(test$DIABETES,levels=c(0,1),labels=c(
   "Never/Inactive","Recent/Active"))
@@ -61,14 +61,14 @@ test$DEPever<-factor(test$DEPever,levels=c(0,1),labels=
 label(test$SEX)<-"Sex at Birth"; label(test$EDUC)<-"Years of Education";
 label(test$NACCAGEB)<-"Age at Baseline";label(test$RACE)<-"Race";
 label(test$NACCNE4S)<-"Number of e4 alleles"; 
-label(test$HYPERTEN)<-"Hypertension";
+label(test$HYPERT)<-"Hypertension";
 label(test$DIABETES)<-"Diabetes"; label(test$SMOKYRS)<-"Smoking Years";
 label(test$BMI_bin)<-"BMI"; label(test$NACCTBI)<-"TBI Ever";
 label(test$DEPever)<-"Depression Ever"
 label(test$Time)<-"Follow-Up Time"
 
 #creating table 1
-tab1<-table1(~ Time+SEX+EDUC+NACCAGEB+RACE+NACCNE4S+HYPERTEN+DIABETES+
+tab1<-table1(~ Time+SEX+EDUC+NACCAGEB+RACE+NACCNE4S+HYPERT+DIABETES+
          SMOKYRS+BMI_bin+NACCTBI+DEPever | Status, data=test)
 
 #creating LaTex code to input table 1 into paper
@@ -120,8 +120,8 @@ graphevent$trial_type_clean<-
 ##### Power and N needed plots #####
 
 #plotting the difference in median power over treatment effects
-#saving as .tiff file
-tiff("powerplot.tiff", units="in", width=6, height=5, res=1000)
+#saving as .eps file
+tiff(here("Results","powerplot.tiff"), units="in", width=6, height=5, res=1000)
 ggplot(graphdf2[graphdf2$trial_type_clean!="Cognitive Test Model",], 
        aes(x=treat_effect, y=median, group=trial_type_clean, 
            color=trial_type_clean)) + 
@@ -132,15 +132,13 @@ ggplot(graphdf2[graphdf2$trial_type_clean!="Cognitive Test Model",],
   scale_color_discrete(name = "Sampling Type")
 dev.off()
 
-
 #plotting sample sizes required for each trial type (median)
-tiff("recruitplot.tiff", units="in", width=6, height=5, res=1000)
+tiff(here("Results","recruitplot.tiff"), units="in", width=6, height=5, res=1000)
 ggplot(graphevent, aes(x=treat_effect, y=median, group=trial_type_clean, 
                        color=trial_type_clean)) +
   geom_line() + geom_point() + ylab("Median N(10,000 trials)") +
   xlab("Treatment Effect Size") +
-  ggtitle("Figure 4. Median N Required to Recruit for 0.8 Power Using Different 
-  Sampling Methods")+
+  ggtitle("Figure 4. Median N Required to Recruit for 0.8 Power Using \n Different Sampling Methods")+
   theme(legend.position = c(0.75, 0.65))+
   scale_color_discrete(name = "Sampling Type")+
   geom_magnify(from=c(0.2,0.5,100,7000),to=c(0.2,0.5,30000,120000),
@@ -163,8 +161,8 @@ graphdfhr$trial_type_clean<-ifelse(graphdfhr$trial_type==
 
 # graph showing the varied distributions of hazard ratios from the 
 # three methods
-#sving as .tiff file
-tiff("dens3plot.tiff", units="in", width=6, height=5, res=1000)
+# saving as .tiff file
+tiff(here("Results","dens3plot.tiff"), units="in", width=6, height=5, res=1000)
 ggplot(graphdfhr[graphdfhr$treat_effect==0.2,], 
                   aes(x = value, fill=trial_type_clean)) + 
   geom_density(alpha = 0.5)+geom_vline(xintercept = 0.8, linetype="dotted", 
