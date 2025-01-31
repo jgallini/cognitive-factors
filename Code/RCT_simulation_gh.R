@@ -311,8 +311,8 @@ for (treat_effect in c(0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.40,0.45,0.50)){
 }
 
 #saving output
-save(powerlist,file=here("Data","powerlist_gh.Rda"))
-save(nlist,file=here("Data","nlist_gh.Rda"))
-save(hrlist,file=here("Data","hrlist_gh.Rda"))
-save(eventlist,file=here("Data","eventlist_gh.Rda")
+# save(powerlist,file=here("Data","powerlist_gh.Rda"))
+# save(nlist,file=here("Data","nlist_gh.Rda"))
+# save(hrlist,file=here("Data","hrlist_gh.Rda"))
+# save(eventlist,file=here("Data","eventlist_gh.Rda"))
 
